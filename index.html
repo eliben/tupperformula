@@ -1,0 +1,38 @@
+<!doctype html>
+<style>
+  .spacerheader {
+    width: 30px;
+  }
+  .spacerrow {
+    height: 30px;
+  }
+  .headerRow {
+    text-align: center;
+    font-weight: bold;
+  }
+</style>
+<body>
+<table id="control-table">
+</table>
+<table id="main-table">
+    <tr>
+        <td class="headerRow">N</td>
+    </tr>
+    <tr>
+      <td>
+        <textarea id="num" name="num" rows="15" cols="80" spellcheck="false"></textarea>
+      </td>
+    <tr class="spacerrow"></tr>
+    <tr>
+      <td class="headerRow">Plot</td>
+    </tr>
+    <tr>
+      <td>
+        <canvas id="plot" width="600" height="300"></canvas>
+      </td>
+    </tr>
+</table>
+
+<script src="script.js"></script>
+
+</body>
