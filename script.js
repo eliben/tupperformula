@@ -38,6 +38,8 @@ let State = {
 };
 
 function init() {
+    // TODO: set the canvas size based on squareSize
+    
     State.ctx = Canvas.getContext('2d');
     State.grid = new PlotGrid(State.plotWidth, State.plotHeight);
 
@@ -70,8 +72,13 @@ function drawPlot() {
 }
 
 function onNumChange() {
-    let val = Knum.value;
-    console.log(val);
+    let val = Number(Knum.value);
+
+    if (isNaN(val)) {
+        console.log(`number in K text is not an integer`);
+    }
+
+    // TODO: do the calc
 }
 
 init();
