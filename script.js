@@ -17,12 +17,14 @@ class PlotGrid {
     }
 }
 
+const Canvas = document.getElementById('plot');
+const Knum = document.querySelector('#knum');
+
 let State = {
-    canvas: null,
     ctx: null,
 
     // The "plot" is a 106x17 grid of squares.
-    squareSize: 5,
+    squareSize: 6,
     plotWidth: 106,
     plotHeight: 17,
 
@@ -36,16 +38,21 @@ let State = {
 };
 
 function init() {
-    State.canvas = document.getElementById('plot');
-    State.ctx = State.canvas.getContext('2d');
-
+    State.ctx = Canvas.getContext('2d');
     State.grid = new PlotGrid(State.plotWidth, State.plotHeight);
 
+    for (let x = 0; x < State.plotWidth; x++) {
+        for (let y = 0; y < State.plotHeight; y++) {
+            State.grid.setCell(x, y, x === y);
+        }
+    }
+
     drawPlot();
+    Knum.addEventListener('input', onNumChange);
 }
 
 function drawPlot() {
-    State.ctx.clearRect(0, 0, State.canvas.width, State.canvas.height);
+    State.ctx.clearRect(0, 0, Canvas.width, Canvas.height);
 
     for (let x = 0; x < State.plotWidth; x++) {
         for (let y = 0; y < State.plotHeight; y++) {
@@ -60,6 +67,11 @@ function drawPlot() {
             State.ctx.fillRect(cx, cy, State.squareSize, State.squareSize);
         }
     }
+}
+
+function onNumChange() {
+    let val = Knum.value;
+    console.log(val);
 }
 
 init();
