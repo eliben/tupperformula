@@ -21,83 +21,67 @@ class PlotGrid {
     }
 }
 
+// Program state
 const Canvas = document.getElementById('plot');
+const Ctx = Canvas.getContext('2d');
 const Knum = document.querySelector('#knum');
+Knum.addEventListener('input', onNumChange);
 
-let State = {
-    ctx: null,
+// Our grid is the default 106x17
+const SquareSize = 6;
+const GridWidth = 106;
+const GridHeight = 17;
 
-    // The "plot" is a 106x17 grid of squares.
-    squareSize: 6,
-    plotWidth: 106,
-    plotHeight: 17,
+// Constants for drawing the grid on the canvas
+const GridOffsetLeft = 35;
+const GridOffsetTop = 20;
+const GridOffsetBottom = 20;
 
-    // The data for the plot on the canvas. Has plotWidth * plotHeight elements;
-    // each element is false for blank, true for filled.
-    grid: null,
-
-    // The offset of the plot from the left and top boundary of the canvas.
-    plotOffsetLeft: 35,
-    plotOffsetTop: 20,
-    plotOffsetBottom: 20,
-};
-
-function init() {
-    // TODO: set the canvas size based on squareSize
-
-    State.ctx = Canvas.getContext('2d');
-    State.grid = new PlotGrid(State.plotWidth, State.plotHeight);
-
-    drawPlot();
-    Knum.addEventListener('input', onNumChange);
-
-    // Invoke num event to render whatever the text area is showing on init.
-    onNumChange();
-}
+let Grid = new PlotGrid(GridWidth, GridHeight);
 
 function drawPlot() {
-    Canvas.width = State.plotOffsetLeft + State.squareSize * State.plotWidth;
-    Canvas.height = State.plotOffsetTop + State.squareSize * State.plotHeight + State.plotOffsetBottom;
+    Canvas.width = GridOffsetLeft + SquareSize * GridWidth;
+    Canvas.height = GridOffsetTop + SquareSize * GridHeight + GridOffsetBottom;
 
-    State.ctx.clearRect(0, 0, Canvas.width, Canvas.height);
+    Ctx.clearRect(0, 0, Canvas.width, Canvas.height);
 
     // Draw y axis
-    State.ctx.beginPath();
-    State.ctx.moveTo(State.plotOffsetLeft - 1, State.plotOffsetTop);
-    State.ctx.lineTo(State.plotOffsetLeft - 1, State.plotOffsetTop + State.plotHeight * State.squareSize + 1);
-    State.ctx.lineWidth = 1;
-    State.ctx.strokeStyle = 'black';
-    State.ctx.stroke();
+    Ctx.beginPath();
+    Ctx.moveTo(GridOffsetLeft - 1, GridOffsetTop);
+    Ctx.lineTo(GridOffsetLeft - 1, GridOffsetTop + GridHeight * SquareSize + 1);
+    Ctx.lineWidth = 1;
+    Ctx.strokeStyle = 'black';
+    Ctx.stroke();
 
     // y axis labels
-    State.ctx.font = '8px';
-    State.ctx.fillText("K+16", State.plotOffsetLeft - 30, State.plotOffsetTop + 8);
-    State.ctx.fillText("K", State.plotOffsetLeft - 30, State.plotOffsetTop + State.plotHeight * State.squareSize);
+    Ctx.font = '8px';
+    Ctx.fillText("K+16", GridOffsetLeft - 30, GridOffsetTop + 8);
+    Ctx.fillText("K", GridOffsetLeft - 30, GridOffsetTop + GridHeight * SquareSize);
 
     // Draw x axis
-    State.ctx.beginPath();
-    State.ctx.moveTo(State.plotOffsetLeft - 1, State.plotOffsetTop + State.plotHeight * State.squareSize);
-    State.ctx.lineTo(State.plotOffsetLeft + State.plotWidth * State.squareSize, State.plotOffsetTop + State.plotHeight * State.squareSize);
-    State.ctx.lineWidth = 1;
-    State.ctx.strokeStyle = 'black';
-    State.ctx.stroke();
+    Ctx.beginPath();
+    Ctx.moveTo(GridOffsetLeft - 1, GridOffsetTop + GridHeight * SquareSize);
+    Ctx.lineTo(GridOffsetLeft + GridWidth * SquareSize, GridOffsetTop + GridHeight * SquareSize);
+    Ctx.lineWidth = 1;
+    Ctx.strokeStyle = 'black';
+    Ctx.stroke();
 
     // x axis labels
-    State.ctx.fillText("0", State.plotOffsetLeft + 2, State.plotOffsetTop + State.plotHeight * State.squareSize + 12);
-    State.ctx.fillText("105", State.plotOffsetLeft - 3*State.squareSize + State.plotWidth * State.squareSize, State.plotOffsetTop + State.plotHeight * State.squareSize + 12);
+    Ctx.fillText("0", GridOffsetLeft + 2, GridOffsetTop + GridHeight * SquareSize + 12);
+    Ctx.fillText("105", GridOffsetLeft - 3*SquareSize + GridWidth * SquareSize, GridOffsetTop + GridHeight * SquareSize + 12);
 
     // Fill in the grid
-    for (let x = 0; x < State.plotWidth; x++) {
-        for (let y = 0; y < State.plotHeight; y++) {
-            let cx = State.plotOffsetLeft + x * State.squareSize;
-            let cy = State.plotOffsetTop + (State.plotHeight - y - 1) * State.squareSize;
+    for (let x = 0; x < GridWidth; x++) {
+        for (let y = 0; y < GridHeight; y++) {
+            let cx = GridOffsetLeft + x * SquareSize;
+            let cy = GridOffsetTop + (GridHeight - y - 1) * SquareSize;
 
-            if (State.grid.getCell(x, y)) {
-                State.ctx.fillStyle = '#030773';
+            if (Grid.getCell(x, y)) {
+                Ctx.fillStyle = '#030773';
             } else {
-                State.ctx.fillStyle = '#F2F2F2';
+                Ctx.fillStyle = '#F2F2F2';
             }
-            State.ctx.fillRect(cx, cy, State.squareSize, State.squareSize);
+            Ctx.fillRect(cx, cy, SquareSize, SquareSize);
         }
     }
 }
@@ -106,9 +90,9 @@ function onNumChange() {
     let K = BigInt(Knum.value);
     // TODO: catch conversion exception here and do something intelligent?
     // write error on the canvas?
-    for (let x = 0; x < State.plotWidth; x++) {
-        for (let y = 0; y < State.plotHeight; y++) {
-            State.grid.setCell(x, y, tupperFormula(BigInt(x), K + BigInt(y)));
+    for (let x = 0; x < GridWidth; x++) {
+        for (let y = 0; y < GridHeight; y++) {
+            Grid.setCell(x, y, tupperFormula(BigInt(x), K + BigInt(y)));
         }
     }
 
@@ -135,6 +119,11 @@ function tupperFormula(x, y) {
 // 144520248970897582847942537337194567481277782215150702479718813968549088735682987348888251320905766438178883231976923440016667764749242125128995265907053708020473915320841631792025549005418004768657201699730466383394901601374319715520996181145249781945019068359500510657804325640801197867556863142280259694206254096081665642417367403946384170774537427319606443899923010379398938675025786929455234476319291860957618345432248004921728033349419816206749854472038193939738513848960476759782673313437697051994580681869819330446336774047268864
 // is the pacman thing
 //
+// This tupper formula comes out inverted on both axes
+// 960939379918958884971672962127852754715004339660129306651505519271702802395266424689642842174350718121267153782770623355993237280874144307891325963941337723487857735749823926629715517173716995165232890538221612403238855866184013235585136048828693337902491454229288667081096184496091705183454067827731551705405381627380967602565625016981482083418783163849115590225610003652351370343874461848378737238198224849863465033159410054974700593138339226497249461751545728366702369745461014655997933798537483143786841806593422227898388722980000748404719
+//
 // Have these as pre-sets.
 
-init();
+// Trigger a redraw to get started.
+onNumChange();
+
