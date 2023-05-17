@@ -15,6 +15,10 @@ class PlotGrid {
     setCell(x, y, value) {
         this.data[y * this.w + x] = value;
     }
+
+    clear() {
+        this.data.fill(false);
+    }
 }
 
 const Canvas = document.getElementById('plot');
@@ -39,15 +43,9 @@ let State = {
 
 function init() {
     // TODO: set the canvas size based on squareSize
-    
+
     State.ctx = Canvas.getContext('2d');
     State.grid = new PlotGrid(State.plotWidth, State.plotHeight);
-
-    for (let x = 0; x < State.plotWidth; x++) {
-        for (let y = 0; y < State.plotHeight; y++) {
-            State.grid.setCell(x, y, x === y);
-        }
-    }
 
     drawPlot();
     Knum.addEventListener('input', onNumChange);
@@ -72,13 +70,31 @@ function drawPlot() {
 }
 
 function onNumChange() {
-    let val = Number(Knum.value);
-
-    if (isNaN(val)) {
-        console.log(`number in K text is not an integer`);
+    let K = BigInt(Knum.value);
+    // TODO: catch conversion exception here and do something intelligent?
+    // write error on the canvas?
+    for (let x = 0; x < State.plotWidth; x++) {
+        for (let y = 0; y < State.plotHeight; y++) {
+            State.grid.setCell(x, y, tupperFormula(BigInt(x), K + BigInt(y)));
+        }
     }
 
-    // TODO: do the calc
+    drawPlot();
 }
+
+// Computes the actual Tupper's formula for a given (x,y) with a boolean result.
+function tupperFormula(x, y) {
+    let powOfTwo = 17n * x + y % 17n;
+    let d = (y / 17n) / 2n ** powOfTwo;
+    let rhs = d % 2n;
+    return rhs == 1n;
+}
+
+// TODO: note
+// 4858450636189713423582095962494202044581400587983244549483093085061934704708809928450644769865524364849997247024915119110411605739177407856919754326571855442057210445735883681829823754139634338225199452191651284348332905131193199953502413758765239264874613394906870130562295813219481113685339535565290850023875092856892694555974281546386510730049106723058933586052544096664351265349363643957125565695936815184334857605266940161251266951421550539554519153785457525756590740540157929001765967965480064427829131488548259914721248506352686630476300
+// produces the formula in the right orientation
+//
+// 2352035939949658122140829649197960929306974813625028263292934781954073595495544614140648457342461564887325223455620804204796011434955111022376601635853210476633318991990462192687999109308209472315419713652238185967518731354596984676698288025582563654632501009155760415054499960
+// produces euler's formula
 
 init();
