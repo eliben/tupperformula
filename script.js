@@ -37,8 +37,9 @@ let State = {
     grid: null,
 
     // The offset of the plot from the left and top boundary of the canvas.
-    plotOffsetLeft: 20,
+    plotOffsetLeft: 35,
     plotOffsetTop: 20,
+    plotOffsetBottom: 20,
 };
 
 function init() {
@@ -55,17 +56,46 @@ function init() {
 }
 
 function drawPlot() {
+    Canvas.width = State.plotOffsetLeft + State.squareSize * State.plotWidth;
+    Canvas.height = State.plotOffsetTop + State.squareSize * State.plotHeight + State.plotOffsetBottom;
+
     State.ctx.clearRect(0, 0, Canvas.width, Canvas.height);
 
+    // Draw y axis
+    State.ctx.beginPath();
+    State.ctx.moveTo(State.plotOffsetLeft - 1, State.plotOffsetTop);
+    State.ctx.lineTo(State.plotOffsetLeft - 1, State.plotOffsetTop + State.plotHeight * State.squareSize + 1);
+    State.ctx.lineWidth = 1;
+    State.ctx.strokeStyle = 'black';
+    State.ctx.stroke();
+
+    // y axis labels
+    State.ctx.font = '8px';
+    State.ctx.fillText("K+16", State.plotOffsetLeft - 30, State.plotOffsetTop + 8);
+    State.ctx.fillText("K", State.plotOffsetLeft - 30, State.plotOffsetTop + State.plotHeight * State.squareSize);
+
+    // Draw x axis
+    State.ctx.beginPath();
+    State.ctx.moveTo(State.plotOffsetLeft - 1, State.plotOffsetTop + State.plotHeight * State.squareSize);
+    State.ctx.lineTo(State.plotOffsetLeft + State.plotWidth * State.squareSize, State.plotOffsetTop + State.plotHeight * State.squareSize);
+    State.ctx.lineWidth = 1;
+    State.ctx.strokeStyle = 'black';
+    State.ctx.stroke();
+
+    // x axis labels
+    State.ctx.fillText("0", State.plotOffsetLeft + 2, State.plotOffsetTop + State.plotHeight * State.squareSize + 12);
+    State.ctx.fillText("105", State.plotOffsetLeft - 3*State.squareSize + State.plotWidth * State.squareSize, State.plotOffsetTop + State.plotHeight * State.squareSize + 12);
+
+    // Fill in the grid
     for (let x = 0; x < State.plotWidth; x++) {
         for (let y = 0; y < State.plotHeight; y++) {
             let cx = State.plotOffsetLeft + x * State.squareSize;
             let cy = State.plotOffsetTop + (State.plotHeight - y - 1) * State.squareSize;
 
             if (State.grid.getCell(x, y)) {
-                State.ctx.fillStyle = 'black';
+                State.ctx.fillStyle = '#030773';
             } else {
-                State.ctx.fillStyle = '#E5E5E5';
+                State.ctx.fillStyle = '#F2F2F2';
             }
             State.ctx.fillRect(cx, cy, State.squareSize, State.squareSize);
         }
