@@ -87,15 +87,21 @@ function drawPlot() {
 }
 
 function onNumChange() {
-    let K = BigInt(Knum.value);
-    // TODO: catch conversion exception here and do something intelligent?
-    // write error on the canvas?
-    for (let x = 0; x < GridWidth; x++) {
-        for (let y = 0; y < GridHeight; y++) {
-            Grid.setCell(x, y, tupperFormula(BigInt(x), K + BigInt(y)));
-        }
-    }
+    try {
+        let K = BigInt(Knum.value);
 
+        for (let x = 0; x < GridWidth; x++) {
+            for (let y = 0; y < GridHeight; y++) {
+                Grid.setCell(x, y, tupperFormula(BigInt(x), K + BigInt(y)));
+            }
+        }
+    
+        Knum.style.background = 'white';
+    } catch (error) {
+        Knum.style.background = '#f7b7b7';
+        Grid.clear();
+    }
+    
     drawPlot();
 }
 
