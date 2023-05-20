@@ -41,6 +41,7 @@
   .plotcanvas {
     grid-area: plotcanvas;
     justify-self: center;
+    padding: 10px;
   }
   
   .flipbox {
@@ -55,6 +56,13 @@
     grid-area: sidebar;
     font-family: Verdana, sans-serif;
     font-size: 14px;
+    border: solid 1px;
+    border-color: darkgray;
+    padding: 5px;
+  }
+
+  .sidebar-list {
+    padding-left: 1em;
   }
 </style>
 
@@ -78,7 +86,16 @@
       <input type="checkbox" id="flipy"><label for="flipy">Flip Y</label></input>
     </div>
     <div class="sidebar">
-      this is a sidebar
+      <b><a href="https://en.wikipedia.org/wiki/Tupper%27s_self-referential_formula">Tupper formula</a>
+      demo.</b>
+
+      <p>Actions you can try here:</p>
+
+      <ul class="sidebar-list">
+        <li>Update the value of K or paste one from somewhere to see the corresponding plot.</li>
+        <li>Use the <it>Predefined K</it> dropdown and click <it>Set</it> to populate K with a predefined value.</li>
+        <li>Click on the plot to flip squares between on and off state - this also updates the value of K.</li>
+      </ul>
     </div>
   </div>
 
