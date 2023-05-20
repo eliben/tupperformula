@@ -18,6 +18,10 @@ class PlotGrid {
         this.data[y * this.w + x] = value;
     }
 
+    flipCell(x, y) {
+        this.data[y * this.w + x] = !this.data[y * this.w + x];
+    }
+
     clear() {
         this.data.fill(false);
     }
@@ -26,6 +30,7 @@ class PlotGrid {
 // Program state
 const Canvas = document.getElementById('plot');
 const Ctx = Canvas.getContext('2d');
+Canvas.addEventListener('click', onCanvasClick, false);
 const Knum = document.querySelector('#knum');
 Knum.addEventListener('input', onStateChange);
 const Samples = document.querySelector("#samples");
@@ -145,6 +150,45 @@ function onSetSample() {
     let selectedK = kSamples[Samples.selectedIndex];
     Knum.value = selectedK.value;
     onStateChange();
+}
+
+function onCanvasClick(ev) {
+    // Find x,y offsets of click within the canvas.
+    let canvasRect = Canvas.getBoundingClientRect();
+    let x = ev.clientX - canvasRect.left;
+    let y = ev.clientY - canvasRect.top;
+    // console.log(`click at ${x} ${y}`);
+
+    // Find square offsets from the Canvas's top-left corner, counting right
+    // and down, and ensure the click is in the right bounds.
+    let xc = Math.floor((x - GridOffsetLeft) / SquareSize);
+    let yc = Math.floor((y - GridOffsetTop) / SquareSize);
+    if (xc < 0 || xc >= GridWidth || yc < 0 || yc >= GridHeight) {
+        return;
+    }
+
+    // Calculate grid location of the click, depending on the flip status.
+    // Note the different order of conditions, because the y click counts from
+    // the top down.
+    let gridX = Flipx.checked ? GridWidth - 1 - xc : xc;
+    let gridY = Flipy.checked ? yc : GridHeight - 1 - yc;
+    Grid.flipCell(gridX, gridY);
+
+    // Update the K value with a new one calculated from the modified grid
+    Knum.value = gridToK();
+    onStateChange();
+}
+
+// Calculate K value from the grid.
+function gridToK() {
+    let kval = BigInt(0);
+
+    for (let x = GridWidth - 1; x >= 0; x--) {
+        for (let y = GridHeight - 1; y >= 0; y--) {
+            kval = 2n * kval + BigInt(Grid.getCell(x, y));
+        }
+    }
+    return kval * 17n;
 }
 
 // Computes the actual Tupper's formula for a given (x,y) with a boolean result.
