@@ -88,7 +88,9 @@ function drawPlot() {
             let cx = GridOffsetLeft + x * SquareSize;
             let cy = GridOffsetTop + (GridHeight - y - 1) * SquareSize;
 
-            if (Grid.getCell(x, y)) {
+            let plotX = Flipx.checked ? (GridWidth - x - 1) : x;
+            let plotY = Flipy.checked ? (GridHeight - y - 1) : y;
+            if (Grid.getCell(plotX, plotY)) {
                 Ctx.fillStyle = '#030773';
             } else {
                 Ctx.fillStyle = '#F2F2F2';
