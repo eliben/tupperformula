@@ -1,7 +1,7 @@
 'use strict';
 
 // PlotGrid implements a two dimensional grid [width x height], and provides
-// get/set access to the grid's cells.
+// access to the grid's cells. Each cell has a boolean value.
 class PlotGrid {
     constructor(width, height) {
         this.w = width;
@@ -28,6 +28,10 @@ class PlotGrid {
 }
 
 // Program state
+const GridWidth = 106;
+const GridHeight = 17;
+let Grid = new PlotGrid(GridWidth, GridHeight);
+
 const Canvas = document.getElementById('plot');
 const Ctx = Canvas.getContext('2d');
 Canvas.addEventListener('click', onCanvasClick, false);
@@ -40,11 +44,6 @@ Flipx.addEventListener("change", onStateChange);
 const Flipy = document.querySelector("#flipy");
 Flipy.addEventListener("change", onStateChange);
 
-// Our grid is the default 106x17
-const GridWidth = 106;
-const GridHeight = 17;
-let Grid = new PlotGrid(GridWidth, GridHeight);
-
 // Constants for drawing the grid on the canvas
 const SquareSize = 6;
 const GridOffsetLeft = 35;
@@ -53,6 +52,7 @@ const GridOffsetBottom = 20;
 
 const kSamples = [
     { 'name': '', 'value': '' },
+    { 'name': 'Zero (clear plot)', 'value': '0' },
     { 'name': "Tupper formula", 'value': '4858450636189713423582095962494202044581400587983244549483093085061934704708809928450644769865524364849997247024915119110411605739177407856919754326571855442057210445735883681829823754139634338225199452191651284348332905131193199953502413758765239264874613394906870130562295813219481113685339535565290850023875092856892694555974281546386510730049106723058933586052544096664351265349363643957125565695936815184334857605266940161251266951421550539554519153785457525756590740540157929001765967965480064427829131488548259914721248506352686630476300' },
     { 'name': "Square smiley", 'value': '6064344935827571835614778444061589919313891311' },
     { 'name': "Euler's formula", 'value': '2352035939949658122140829649197960929306974813625028263292934781954073595495544614140648457342461564887325223455620804204796011434955111022376601635853210476633318991990462192687999109308209472315419713652238185967518731354596984676698288025582563654632501009155760415054499960' },
@@ -157,10 +157,9 @@ function onCanvasClick(ev) {
     let canvasRect = Canvas.getBoundingClientRect();
     let x = ev.clientX - canvasRect.left;
     let y = ev.clientY - canvasRect.top;
-    // console.log(`click at ${x} ${y}`);
 
     // Find square offsets from the Canvas's top-left corner, counting right
-    // and down, and ensure the click is in the right bounds.
+    // and down, and ensure the click is in bounds.
     let xc = Math.floor((x - GridOffsetLeft) / SquareSize);
     let yc = Math.floor((y - GridOffsetTop) / SquareSize);
     if (xc < 0 || xc >= GridWidth || yc < 0 || yc >= GridHeight) {
@@ -168,27 +167,15 @@ function onCanvasClick(ev) {
     }
 
     // Calculate grid location of the click, depending on the flip status.
-    // Note the different order of conditions, because the y click counts from
-    // the top down.
+    // Note the different order of conditions, because the y position is
+    // provided from the top down.
     let gridX = Flipx.checked ? GridWidth - 1 - xc : xc;
     let gridY = Flipy.checked ? yc : GridHeight - 1 - yc;
     Grid.flipCell(gridX, gridY);
 
     // Update the K value with a new one calculated from the modified grid
-    Knum.value = gridToK();
+    Knum.value = encodeGridToK();
     onStateChange();
-}
-
-// Calculate K value from the grid.
-function gridToK() {
-    let kval = BigInt(0);
-
-    for (let x = GridWidth - 1; x >= 0; x--) {
-        for (let y = GridHeight - 1; y >= 0; y--) {
-            kval = 2n * kval + BigInt(Grid.getCell(x, y));
-        }
-    }
-    return kval * 17n;
 }
 
 // Computes the actual Tupper's formula for a given (x,y) with a boolean result.
@@ -210,10 +197,23 @@ function gridToK() {
 // ...
 // (x=1, y=K):     q >> (17 + 0) ==> the eighteenth lowest bit of IMG
 // ... and so on
-
 function tupperFormula(x, y) {
     let d = (y / 17n) >> (17n * x + y % 17n);
     return d % 2n == 1n;
+}
+
+// Calculate K value from the grid.
+function encodeGridToK() {
+    let kval = BigInt(0);
+
+    // Build up K from MSB to LSB, scanning from the top-right corner down and
+    // then moving left by column.
+    for (let x = GridWidth - 1; x >= 0; x--) {
+        for (let y = GridHeight - 1; y >= 0; y--) {
+            kval = 2n * kval + BigInt(Grid.getCell(x, y));
+        }
+    }
+    return kval * 17n;
 }
 
 // elt creates a new HTML element with the given type and list of children
@@ -230,4 +230,3 @@ function elt(type, ...children) {
     }
     return node;
 }
-
